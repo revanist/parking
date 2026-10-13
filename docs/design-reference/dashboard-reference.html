@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CampusPark Redesign - Collapsible</title>
+    <script src="/parking/assets/js/tailwindcss.js"></script>
+    <script src="/parking/assets/js/lucide.js"></script>
+    <style>
+        /* Custom font to match the clean aesthetic */
+        @import url('/parking/assets/css/fonts.css');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* Very light gray bg */
+        }
+
+        /* Subtle grid background */
+        .bg-grid {
+            background-size: 40px 40px;
+            background-image: linear-gradient(to right, #f1f5f9 1px, transparent 1px),
+                              linear-gradient(to bottom, #f1f5f9 1px, transparent 1px);
+        }
+
+        /* Smooth shadow for modern cards */
+        .card-shadow {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        }
+        .card-shadow:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
+            transition: all 0.2s ease-in-out;
+        }
+
+        /* Sidebar transition logic */
+        #sidebar {
+            transition: width 0.3s ease, transform 0.3s ease;
+        }
+        
+        /* When the body has class 'sidebar-collapsed', hide the sidebar */
+        body.sidebar-collapsed #sidebar {
+            width: 0;
+            overflow: hidden;
+            border-right-width: 0;
+        }
+    </style>
+</head>
+<body class="text-slate-800 h-screen flex overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="w-64 bg-white border-r border-slate-200 flex flex-col justify-between shrink-0 z-10 relative">
+        <div class="w-64"> <!-- Inner wrapper to prevent content squishing during collapse -->
+            <!-- Logo -->
+            <div class="p-6 flex items-center gap-3">
+                <div class="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center shrink-0">
+                    <i data-lucide="square-parking" class="text-white w-5 h-5"></i>
+                </div>
+                <span class="font-bold text-lg tracking-tight whitespace-nowrap">CampusPark</span>
+            </div>
+
+            <!-- User Profile Box -->
+            <div class="px-6 mb-8">
+                <div class="bg-slate-900 rounded-xl p-4 text-white shadow-md relative overflow-hidden">
+                    <div class="absolute -right-4 -top-4 w-16 h-16 bg-white/5 rounded-full blur-xl"></div>
+                    
+                    <p class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold mb-1">Signed in as</p>
+                    <p class="font-semibold text-sm mb-3">Student / Faculty</p>
+                    <div class="flex items-center gap-2 text-xs text-slate-300">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]"></span>
+                        System online
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <nav class="px-4 space-y-1">
+                <p class="px-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Navigation</p>
+                
+                <a href="#" class="flex items-center gap-3 px-3 py-2.5 bg-slate-900 text-white rounded-lg text-sm font-medium transition-colors">
+                    <i data-lucide="layout-dashboard" class="w-4 h-4 shrink-0"></i>
+                    Dashboard
+                </a>
+                <a href="#" class="flex items-center gap-3 px-3 py-2.5 text-slate-500 hover:text-slate-900 hover:bg-slate-50 rounded-lg text-sm font-medium transition-colors">
+                    <i data-lucide="car" class="w-4 h-4 shrink-0"></i>
+                    My Vehicle
+                </a>
+                <a href="#" class="flex items-center gap-3 px-3 py-2.5 text-slate-500 hover:text-slate-900 hover:bg-slate-50 rounded-lg text-sm font-medium transition-colors">
+                    <i data-lucide="credit-card" class="w-4 h-4 shrink-0"></i>
+                    Parking Permit
+                </a>
+                <a href="#" class="flex items-center gap-3 px-3 py-2.5 text-slate-500 hover:text-slate-900 hover:bg-slate-50 rounded-lg text-sm font-medium transition-colors">
+                    <i data-lucide="history" class="w-4 h-4 shrink-0"></i>
+                    Parking History
+                </a>
+                <a href="#" class="flex items-center gap-3 px-3 py-2.5 text-slate-500 hover:text-slate-900 hover:bg-slate-50 rounded-lg text-sm font-medium transition-colors">
+                    <i data-lucide="alert-triangle" class="w-4 h-4 shrink-0"></i>
+                    Violations
+                </a>
+            </nav>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 flex flex-col h-screen overflow-y-auto bg-grid relative w-full">
+        
+        <!-- Top Header -->
+        <header class="h-16 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-8 sticky top-0 z-20">
+            <div class="flex items-center gap-4">
+                
+                <!-- 3-Bar Menu Button (Hamburger) -->
+                <button id="menu-toggle" class="p-2 -ml-2 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-slate-200">
+                    <i data-lucide="menu" class="w-5 h-5"></i>
+                </button>
+
+                <div class="hidden sm:flex items-center gap-2 text-xs font-semibold tracking-wider text-slate-500 uppercase">
+                    Campus Parking <span class="text-slate-300">•</span> My Space
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <span class="hidden sm:flex items-center gap-2 text-xs font-medium text-slate-600 bg-slate-100 px-3 py-1.5 rounded-full border border-slate-200">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                    Student / Faculty
+                </span>
+                <button class="text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors">Sign out</button>
+            </div>
+        </header>
+
+        <!-- Dashboard Content -->
+        <div class="p-8 max-w-7xl mx-auto w-full">
+            
+            <!-- Page Title Area -->
+            <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
+                <div>
+                    <h1 class="text-3xl font-bold text-slate-900 tracking-tight mb-2">Welcome back, Juan.</h1>
+                    <p class="text-slate-500 text-sm">Here is your current campus parking information.</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="flex items-center gap-2 text-xs font-medium text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                        Permit active
+                    </span>
+                    <button class="bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors shadow-sm">
+                        Sign out
+                    </button>
+                </div>
+            </div>
+
+            <!-- Top Stats Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+                <!-- Status Card -->
+                <div class="bg-white p-5 rounded-2xl border border-slate-100 card-shadow flex justify-between items-center transition-all">
+                    <div>
+                        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Permit Status</p>
+                        <p class="text-2xl font-bold text-emerald-500">Active</p>
+                    </div>
+                    <div class="w-10 h-10 rounded-full bg-slate-900 flex items-center justify-center text-white">
+                        <i data-lucide="credit-card" class="w-5 h-5"></i>
+                    </div>
+                </div>
+
+                <!-- Slot Card -->
+                <div class="bg-white p-5 rounded-2xl border border-slate-100 card-shadow flex justify-between items-center transition-all">
+                    <div>
+                        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Assigned Slot</p>
+                        <p class="text-2xl font-bold text-slate-800">A-24</p>
+                    </div>
+                    <div class="w-10 h-10 rounded-full bg-slate-900 flex items-center justify-center text-white">
+                        <i data-lucide="square-parking" class="w-5 h-5"></i>
+                    </div>
+                </div>
+
+                <!-- Vehicle Card -->
+                <div class="bg-white p-5 rounded-2xl border border-slate-100 card-shadow flex justify-between items-center transition-all">
+                    <div>
+                        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Vehicle</p>
+                        <p class="text-2xl font-bold text-slate-800 tracking-tight">ABC-1234</p>
+                    </div>
+                    <div class="w-10 h-10 rounded-full bg-slate-900 flex items-center justify-center text-white">
+                        <i data-lucide="car" class="w-5 h-5"></i>
+                    </div>
+                </div>
+
+                <!-- Violations Card -->
+                <div class="bg-white p-5 rounded-2xl border border-slate-100 card-shadow flex justify-between items-center transition-all">
+                    <div>
+                        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Violations</p>
+                        <p class="text-2xl font-bold text-emerald-500">0</p>
+                    </div>
+                    <div class="w-10 h-10 rounded-full bg-slate-900 flex items-center justify-center text-white">
+                        <i data-lucide="alert-circle" class="w-5 h-5"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Section Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                <!-- Current Parking Details -->
+                <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-100 card-shadow p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <div>
+                            <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Your Parking</p>
+                            <h2 class="text-lg font-bold text-slate-800">Current parking details</h2>
+                        </div>
+                        <a href="#" class="text-sm font-medium text-slate-500 hover:text-slate-900 flex items-center gap-1 transition-colors">
+                            Manage <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                        </a>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <!-- Vehicle Detail Card -->
+                        <div class="bg-slate-50 rounded-xl p-4 border border-slate-100">
+                            <div class="w-8 h-8 rounded-md bg-slate-800 flex items-center justify-center text-white mb-3">
+                                <i data-lucide="car" class="w-4 h-4"></i>
+                            </div>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Vehicle</p>
+                            <p class="font-semibold text-slate-800 mb-0.5">Toyota Vios</p>
+                            <p class="text-xs text-slate-500">ABC-1234</p>
+                        </div>
+
+                        <!-- Permit Detail Card -->
+                        <div class="bg-emerald-50/50 rounded-xl p-4 border border-emerald-100 relative overflow-hidden">
+                            <div class="absolute top-0 right-0 w-16 h-16 bg-emerald-100 rounded-bl-full opacity-50"></div>
+                            <div class="w-8 h-8 rounded-md bg-emerald-500 flex items-center justify-center text-white mb-3 relative z-10">
+                                <i data-lucide="credit-card" class="w-4 h-4"></i>
+                            </div>
+                            <p class="text-[10px] font-bold text-emerald-600 uppercase tracking-wider mb-1 relative z-10">Permit</p>
+                            <p class="font-semibold text-slate-800 mb-0.5 relative z-10">Active</p>
+                            <p class="text-xs text-slate-500 relative z-10">Until Mar 31, 2027</p>
+                        </div>
+
+                        <!-- Slot Detail Card -->
+                        <div class="bg-slate-50 rounded-xl p-4 border border-slate-100">
+                            <div class="w-8 h-8 rounded-md bg-slate-800 flex items-center justify-center text-white mb-3">
+                                <i data-lucide="square-parking" class="w-4 h-4"></i>
+                            </div>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Assigned Slot</p>
+                            <p class="font-semibold text-slate-800 mb-0.5">A-24</p>
+                            <p class="text-xs text-slate-500">Area A</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="bg-white rounded-2xl border border-slate-100 card-shadow p-6">
+                    <div class="mb-6">
+                        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Activity</p>
+                        <h2 class="text-lg font-bold text-slate-800">Recent activity</h2>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                            <span class="text-sm text-slate-600">Vehicle entered</span>
+                            <span class="text-xs font-medium text-slate-400">7:42 AM</span>
+                        </div>
+                        <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                            <span class="text-sm text-slate-600">Permit approved</span>
+                            <span class="text-xs font-medium text-slate-400">Yesterday</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-slate-600">Vehicle registered</span>
+                            <span class="text-xs font-medium text-slate-400">Sep 24</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Initialize Icons
+        lucide.createIcons();
+
+        // Collapsible Sidebar Logic
+        const menuToggle = document.getElementById('menu-toggle');
+        const body = document.body;
+
+        menuToggle.addEventListener('click', () => {
+            // Toggles the 'sidebar-collapsed' class on the body tag
+            body.classList.toggle('sidebar-collapsed');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+CampusPark - fixes applied to parking v1
+
+1. Security and account protection
+- Added reusable CSRF token helpers and form tokens to POST forms.
+- Added CSRF checks to authenticated mutation handlers and login/registration.
+- Configured session cookies with HttpOnly, SameSite=Lax, and Secure when HTTPS is used.
+- Rotates the CSRF token after successful login.
+- Database connection errors are logged server-side rather than exposing PDO details to users.
+- Database settings can be configured through CAMPUSPARK_DB_HOST, CAMPUSPARK_DB_NAME, CAMPUSPARK_DB_USER, and CAMPUSPARK_DB_PASS environment variables. Local XAMPP defaults remain for development.
+
+2. QR/manual entry consistency
+- QR verification checks the owner/vehicle relationship, active vehicle, approved permit, assigned slot, reserved slot status, active parking area, and expiration.
+- QR entry and manual plate entry lock the vehicle row before checking active sessions, reducing duplicate concurrent entries.
+- Manual entry verifies permit owner consistency and active parking-area status.
+
+3. Role-based navigation
+- Corrected the admin Dashboard link in the violations page so it points to the administrator dashboard, not the security dashboard.
+- Existing server-side role checks remain in place.
+
+4. Permit/slot consistency
+- Permit application creation locks the owned vehicle row and performs the pending/approved check inside a transaction.
+- Permit numbers are based on the unique permit primary key to avoid collisions from simultaneous approvals.
+- Permit approval locks the slot, verifies active area/available slot, checks permit ownership, and checks for duplicate approved assignments before reserving the slot.
+
+Validation performed
+- PHP syntax lint completed across all PHP files.
+- This is a source-level review; a live database/browser test was not possible in this environment.
+
+PROJECT ORGANIZATION (2026-10-13)
+- Moved the SQL import file to database/campus_parking_full.sql.
+- Moved original static design references to docs/design-reference/ with normalized filenames.
+- Moved the development asset-download helper to tools/download_assets.py.
+- Added README.md with project structure, setup, conventions, and deployment checks.
+- Added .env.example to document supported database environment variables; the app does not automatically parse .env files.
+- Added access-denial rules for database, documentation, and development tools folders, and blocked PHP-like execution in uploads.
+- Kept runtime PHP pages in their current locations to avoid breaking route and include paths.
